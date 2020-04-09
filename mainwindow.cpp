@@ -48,7 +48,7 @@ void MainWindow::keyPressEvent(QKeyEvent *event)
     case Qt::Key_F1:
     {
         helpBox->exec();
-        break;
+        return;
     }
     case Qt::Key_Space:
     {
@@ -56,9 +56,9 @@ void MainWindow::keyPressEvent(QKeyEvent *event)
         break;
     }
     default:
-        break;
+        return;
     }
-    repaint();
+    ui->graphWidget->repaint();
 }
 
 void MainWindow::on_actionSave_picture_triggered()

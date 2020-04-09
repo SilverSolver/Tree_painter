@@ -8,23 +8,47 @@
 
 GraphWidget::GraphWidget(QWidget *parent) : QWidget(parent)
 {
-    regime = 1;
+    regime = 2;
     if (regime == 0)
         depth = 12;
     else
-        depth = 22;
-    lineLength   = 60;
-    angle        = 20;
+        //depth = 12;
+        depth = 35;
+    lineLength   = 70;
+    angle        = 22;
     koef         = 0.667;
-    probability1 = 0.95;
-    probability2 = 0.3;
-    //qDebug() << depth;
-    //QVector<QPointF> currentPoints;
+    probability1 = 1;
+    probability2 = 1;
     withLeafs    = true;
-    leafsColor   = QColor( 50, 150, 255);
+    leafsColorR  = 220;
+    leafsColorG  = 200;
+    leafsColorB  = 0;
+    leafsColor   = QColor(leafsColorR, leafsColorG, leafsColorB);
     stemColor    = QColor(  0,   0,   0);
 
+    leafSize1 = 7;
+    leafSize2 = 7;
+
     qsrand(time(NULL));
+}
+
+int GraphWidget::randomColorDeviation()
+{
+    return 50 * (qrand() / float(RAND_MAX)) -
+           std::min(std::min(leafsColorR, leafsColorG), leafsColorB) / 2;
+}
+
+QColor GraphWidget::getNewLeafsColor()
+{
+    if (regime == 2)
+    {
+        QColor newLeafsColor(std::min(int(leafsColorR + 0), 255),
+                             std::min(int(leafsColorG + randomColorDeviation()), 255),
+                             std::min(int(leafsColorB + randomColorDeviation()), 255));
+        return newLeafsColor;
+    }
+    else
+        return leafsColor;
 }
 
 void GraphWidget::recursiveFuction(QPointF currentPoint, int currentDepth,
@@ -35,9 +59,11 @@ void GraphWidget::recursiveFuction(QPointF currentPoint, int currentDepth,
     {
         if (withLeafs == true)
         {
-            int leafSize = 7;
-            painter1.setBrush(QBrush(leafsColor));
-            painter1.drawRect(currentPoint.x(), currentPoint.y(), leafSize, leafSize);
+            painter1.setBrush(QBrush(getNewLeafsColor()));
+            painter1.drawRect(std::max(int(currentPoint.x() - leafSize1 / 2), 0),
+                              std::max(int(currentPoint.y() - leafSize2 / 2), 0),
+                              leafSize1,
+                              leafSize2);
         }
         return;
     }
@@ -82,11 +108,13 @@ void GraphWidget::recursiveFuction(QPointF currentPoint, int currentDepth,
         if (((currentProb1 >= trProb) or (currentProb2 >= trProb))
                 and (withLeafs == true) and (currentDepth >= 2))
         {
-            int leafSize1 = int(fmax(abs(qrand() / float(RAND_MAX)) * 20, 2));
-            int leafSize2 = int(fmax(abs(qrand() / float(RAND_MAX)) * 20, 2));
-            painter1.setBrush(QBrush(leafsColor));
-            painter1.drawRect(angleline1.p2().x(), angleline1.p2().y(),
-                              leafSize1, leafSize2);
+            leafSize1 = int(fmax(abs(qrand() / float(RAND_MAX)) * 30, 10));
+            leafSize2 = int(fmax(abs(qrand() / float(RAND_MAX)) * 30, 10));
+            painter1.setBrush(QBrush(getNewLeafsColor()));
+            painter1.drawRect(std::max(int(angleline1.p2().x() - leafSize1 / 2), 0),
+                              std::max(int(angleline1.p2().y() - leafSize2 / 2), 0),
+                              leafSize1,
+                              leafSize2);
         }
         else
             wasOne = false;
@@ -128,7 +156,7 @@ void GraphWidget::recursiveFuction(QPointF currentPoint, int currentDepth,
                              currentAngle + (0.5 - currentProb3) * 3,
                              currentLength * std::sqrt(koefs), wasOne);
             recursiveFuction(angleline1.p2(), currentDepth + 2,
-                             currentAngle + (0.5 - currentProb4) * 3,
+                             currentAngle - (0.5 - currentProb4) * 3,
                              currentLength * std::sqrt(koefs), wasOne);
         }
 
@@ -141,7 +169,7 @@ void GraphWidget::paintEvent(QPaintEvent *)
     QPainter painter(this);
     uint timestamp=QDateTime::currentDateTime().toTime_t();
     qsrand(timestamp);
-    QPointF startPoint(this->width() / 2, this->height() * 7 / 8);
+    QPointF startPoint(this->width() / 2, this->height() * 95 / 100);
     bool wasOne = false;
     recursiveFuction(startPoint, 0, 90, lineLength, wasOne);
 }

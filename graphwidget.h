@@ -14,6 +14,8 @@ class GraphWidget : public QWidget
 public:
     explicit GraphWidget(QWidget *parent = 0);
     void paintEvent(QPaintEvent *);
+    int randomColorDeviation();
+    QColor getNewLeafsColor();
     void recursiveFuction(QPointF currentPoint, int currentDepth, int currentAngle, int currentLength, bool wasOne);
 
     int regime;
@@ -35,7 +37,12 @@ private:
     //QVector<QPointF> currentPoints;
     //QVector<double> currentData;
     //QFile* currentFile;
+    uint leafsColorR;
+    uint leafsColorG;
+    uint leafsColorB;
 
+    int leafSize1;
+    int leafSize2;
 signals:
 
 public slots:
